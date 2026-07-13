@@ -1,0 +1,74 @@
+**MitoNano Engine V14 — Simulation Layers Explained**
+
+The **simulation layer** (`sim/`) is the **cognitive and adaptive heart** of the MitoNano Engine. It models biological/clinical processes (fiber remodeling, transitions, tracking, provenance) while continuously adapting its own behaviour based on observed reality. V14 makes this layer significantly more **self-aware and resource-proportional** compared to V13.
+
+### 1. Overall Architecture of the Simulation Layer
+
+The `sim/` layer sits at the center of the system:
+
+- It receives inputs from the **orchestration layer** (realised outcomes, scheduling)
+- It drives **GPU computations** for heavy numerical work
+- It outputs decisions, states, and traces that feed back into orchestration and monitoring
+
+All V14 improvements follow the same **wrapper pattern**:
+- New struct holds the **V13 inner component** as a field
+- New behavior is controlled by an `Option<NewConfig>` (defaults to `None` → exact V13 behavior)
+- This guarantees perfect backward compatibility
+
+### 2. Core Simulation Modules in V14
+
+**1. Morphogenesis (`morphogenesis.rs`) — Boundary Remodeling**
+- **Purpose**: Models how boundaries between regions or states evolve over time (like tissue remodeling or cluster boundary shifts in clinical data).
+- **V14 Upgrade (Pillar 1)**: *LoadAdaptiveResegmentingBoundaryAttenuatedModel*
+  - V13 used fixed-interval resegmentation.
+  - V14 dynamically adjusts the cadence: shortens interval when boundaries are changing rapidly (rising `changed_fraction`), lengthens it when things stabilize.
+  - Result: Saves compute when quiet, reacts faster when active.
+
+**2. RL Agent (`rl_agent.rs`) — Taxonomy & Transition Management**
+- **Purpose**: Maintains and extends a taxonomy of clinical transitions/states using temporal attention and reinforcement-learning-inspired logic.
+- **V14 Upgrade (Pillar 3)**: *PromotionCapableTaxonomyExtendingNet*
+  - V13 could only propose provisional clusters (never promote them).
+  - V14 adds a **promotion ledger** that tracks human-confirmed instances across review sessions.
+  - Once a provisional cluster reaches confidence thresholds, it is promoted to a first-class `TransitionType`.
+  - This allows the taxonomy to grow organically and safely.
+
+**3. iVIS / Tracking (`ivis.rs`) — Multi-Frame Tracking & Corroboration**
+- **Purpose**: Tracks entities (e.g., cells, patients, signals) across time using corroboration between multiple frames/views.
+- **V14 Upgrade (Pillar 6)**: *TwoSidedBaselineRelativeClusterCorroboratedTracker*
+  - V13 only detected *excessively high* corroboration (potential over-triggering).
+  - V14 adds symmetric low-side detection (potential track fragmentation or missed associations).
+  - Provides much richer anomaly direction awareness (`High` vs `Low`).
+
+**4. Provenance (`provenance.rs`) — Authority & Governance**
+- **Purpose**: Manages federated authority, cosignatures, and recency-weighted decisions (critical for clinical trust and auditability).
+- **V14 Upgrade (Pillar 7)**: *OverlapTolerantFederatedAuthorityLedger*
+  - V13 used exact pubkey-set matching for recency penalties.
+  - V14 adds **fuzzy overlap** detection: even if one member changes, if majority overlap exists with a recent quorum, it still counts as a repeat.
+  - Makes the system much more robust against minor manipulations or natural turnover in authority sets.
+
+**5. Supporting Modules**
+- `engine.rs`: Main simulation tick loop and scheduling.
+- `params.rs`: All configuration (new V14 fields are optional and default to off).
+- `stats.rs`: Comprehensive tracing for every V14 mechanism (essential for verification and debugging).
+
+### 3. How the Layers Interact (Simplified Flow)
+
+1. **Engine tick** starts
+2. **Morphogenesis** updates physical/boundary state with adaptive cadence
+3. **RL Agent** evaluates transitions and potentially promotes new taxonomy entries
+4. **iVIS Tracker** updates multi-frame tracks with two-sided anomaly detection
+5. **Provenance** validates authority and applies fuzzy recency rules
+6. GPU components (adjoint burst detection, shader verification) are called as needed
+7. Results feed into **orchestration layer** for cost modeling and local refits
+8. All actions logged in rich traces
+
+### 4. Key Design Principles in V14 Simulation Layer
+
+- **Proportional Effort**: Compute and attention scale with actual observed complexity/drift (core theme of V14).
+- **Human-in-the-Loop Safety**: Promotion of new taxonomy entries requires confirmed instances across sessions.
+- **Defensive Trust**: Fuzzy overlap and two-sided checks make the system harder to fool or blind.
+- **Observability**: Every adaptive decision is traceable.
+- **Composability**: Old behavior is always exactly reproducible.
+
+The simulation layer in V14 is no longer just executing a model — it is **meta-adapting** its own modeling strategy in real time while maintaining strong safety and audit properties. This makes it particularly suitable for clinical infrastructure where both responsiveness and reliability are non-negotiable.
+
