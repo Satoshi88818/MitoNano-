@@ -1,0 +1,54 @@
+**Prioritisation for implementing and testing MitoNano V14**, based on risk, clinical impact, engineering leverage, and verification feasibility.
+
+### Prioritisation Framework
+(ranked by importance):
+1. **Patient/Clinical Risk** — Does this affect treatment decisions, dosing, or safety?
+2. **Correctness & Safety** — How easy is it to introduce regressions or over-corrections?
+3. **Impact / Leverage** — How much does it improve core system behavior?
+4. **Dependencies & Complexity** — Implementation effort and interactions.
+5. **Testability** — Ease of writing property tests / fuzz harnesses.
+
+### Recommended Priority Order (V14 Implementation)
+
+| Priority | Pillar | Reason | Recommended Approach |
+|----------|--------|------|----------------------|
+| **1** | **#4 Bounded Local Region Re-Fit** (`orchestration/cost_model.rs`) | Highest clinical risk. Directly modifies decisions that feed downstream routing/treatment. Bug here could cause systematic suboptimal (or unsafe) choices. | Implement first. Strong focus on property tests: "refit never worsens outcome on original window", "non-flagged regions untouched", "idempotency". |
+| **2** | **#6 Two-Sided Corroboration Anomaly** (`sim/ivis.rs`) | High risk for track fragmentation (missed merges) or noisy over-triggering. Critical for tracking integrity in clinical monitoring. | Pair with #4. Test both high/low sides thoroughly, especially edge cases around baseline transitions. |
+| **3** | **#5 Staged, Independently-Reversible Narrowing** (`gpu/shader_verifier.rs`) | Safety-critical (bound changes affect fairness/liveness). Staged + reversible design reduces blast radius but needs careful auditing. | Implement after #4/#6. Heavy emphasis on revertability tests and multi-stage simulation. |
+| **4** | **#1 Load-Adaptive Resegmentation Cadence** (`sim/morphogenesis.rs`) | High compute efficiency win, moderate risk. Oscillations in cadence could waste resources or delay adaptation. | Good early win. Simulate long-running boundary motion + settling phases. |
+| **5** | **#7 Fuzzy-Overlap Recency Quorum** (`sim/provenance.rs`) | Security/governance important but lower direct patient impact. Protects against sophisticated attacks. | Implement once core simulation is stable. Fuzz with adversarial authority swaps. |
+| **6** | **#2 Topology-Scaled Burst Threshold** (`gpu/adjoint_gpu.rs`) | Improves sensitivity scaling. Lower risk if V13 fallback is perfect. | Straightforward. Test across fleet sizes (small → very large). |
+| **7** | **#3 Provisional-Cluster Promotion** (`sim/rl_agent.rs`) | Taxonomy growth is valuable but slowest feedback loop. Least urgent for initial stability. | Implement last. Requires human-review simulation or replay logs. |
+
+### Testing Strategy (Layered and Rigorous)
+
+1. **Unit + Property Tests (Highest Priority)**
+   - For every pillar: Prove that `None` config = exact V13 behaviour (regression suite).
+   - Invariants: "local refit only touches flagged region", "staged narrowing is independently reversible", "fuzzy quorum never lowers requirements".
+   - Use `proptest` or `arbitrary` for randomised inputs (window sizes, fleet scales, noise levels).
+
+2. **Integration Tests**
+   - End-to-end simulation runs with V14 features enabled incrementally.
+   - Compare traces: V13 vs V14 under identical seeds.
+
+3. **Fuzz Harness** (Critical for #4, #5, #6)
+   - Long-running simulations with injected drift, noise, and adversarial patterns.
+   - Monitor for oscillations, over-corrections, or quorum bypasses.
+
+4. **Performance & Stability**
+   - Benchmark compute savings (esp. Pillar 1).
+   - Stress test with growing topology (Pillar 2).
+
+5. **Audit Logging**
+   - Ensure every trace (`stats.rs`) is comprehensive enough for post-hoc review.
+
+### Phased Rollout Plan
+- **Phase 1 (MVP)**: Pillars 4 + 6 + strong property tests. This gives the highest risk reduction.
+- **Phase 2**: Pillars 1 + 5 (efficiency + safety).
+- **Phase 3**: Pillars 2, 7, 3.
+- **Phase 4**: Full `v14-full` + long-term simulation studies.
+
+**First-Principles Rationale**: In safety-critical systems, **correctness > optimization > new features**. Start with mechanisms that can actively *correct* or *prevent* errors (#4, #6, #5), then add those that make the system more efficient or autonomous.
+
+This approach minimizes downside while maximizing learning from real implementation feedback — exactly as the V14 spec itself wisely suggests.
+
