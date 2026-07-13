@@ -1,0 +1,108 @@
+**MitoNano Engine V14 — The AI System Breakdown**
+
+MitoNano is not a general purpose conversational AI. It is a **specialised, embedded clinical grade AI system** focused on real-time adaptive simulation, decision-making, and orchestration in complex biological/clinical domains (mitochondrial, cellular, or nanomedicine modeling and treatment infrastructure).
+
+### Core Nature of the AI
+
+MitoNano’s AI is a **hybrid adaptive control system** that combines:
+- Physics-informed simulation
+- Reinforcement Learning (RL) elements
+- Statistical drift detection and self-remediation
+- Federated provenance and trust mechanisms
+- Topology-aware and load-adaptive computation
+
+It continuously closes the loop between **observation → modeling → decision → remediation → taxonomy evolution**.
+
+### High-Level AI Architecture
+
+The AI operates across three main layers:
+
+1. **Simulation Layer (`sim/`) — The Cognitive Core**
+2. **GPU / Numerical Layer (`gpu/`) — The Perceptual & Computational Substrate**
+3. **Orchestration Layer (`orchestration/`) — The Executive & Risk-Management Layer**
+
+---
+
+### Thorough Component Breakdown
+
+#### 1. Simulation Layer (`sim/`) — The “Brain”
+
+This is where the primary AI intelligence lives.
+
+**A. LoadAdaptiveResegmentingBoundaryAttenuatedModel (`morphogenesis.rs`)**  
+- **Role**: Models dynamic boundary evolution in the simulated biological system (e.g., cell membrane domains, tissue compartments, or state clusters).  
+- **AI Capability**: Meta-adaptation of its own update frequency. It tracks `changed_fraction` trends and shortens/lengthens resegmentation cadence accordingly.  
+- **Why it matters**: Prevents wasting compute on stable regions while staying responsive during critical transitions.
+
+**B. PromotionCapableTaxonomyExtendingNet (`rl_agent.rs`)** — The Core Learning Agent
+- **Role**: This is the most explicit “RL Agent” component.  
+- **Key Functions**:
+  - Maintains a growing taxonomy of clinical transition types using temporal attention grouping.
+  - Proposes provisional clusters for new observed patterns.
+  - Uses a **promotion ledger** to track human-confirmed instances across review sessions.
+  - Once thresholds are met (`confirmed_instances_required` + `min_distinct_review_sessions`), it promotes the provisional cluster into a first-class `TransitionType`.
+- **AI Style**: Semi-supervised taxonomy learning with human-in-the-loop promotion. Combines unsupervised pattern discovery with RL-like credit assignment and attention mechanisms.
+
+**C. TwoSidedBaselineRelativeClusterCorroboratedTracker (`ivis.rs`)**  
+- **Role**: Multi-frame entity tracking (e.g., cells, particles, patients, or molecular states).  
+- **AI Capability**: Two-sided anomaly detection on corroboration rates (both suspiciously high and suspiciously low).  
+- **Clinical Value**: Detects both over-confident false positives and dangerous track fragmentation (lost or split identities).
+
+**D. OverlapTolerantFederatedAuthorityLedger (`provenance.rs`)**  
+- **Role**: Manages trust, authority, and governance over decisions in a federated setting.  
+- **AI Capability**: Fuzzy-overlap recency quorum that defeats simple evasion tactics (e.g., swapping one cosigner).  
+- **Why AI?**: Embodies adversarial robustness and probabilistic trust modeling.
+
+**E. Engine & Supporting Systems**
+- `engine.rs`: Orchestrates the global tick loop.
+- `params.rs`: Configurable “personality” of the AI via feature flags.
+- `stats.rs`: Self-monitoring and explainability layer (all adaptive decisions are traced).
+
+---
+
+#### 2. GPU Layer (`gpu/`) — The Perceptual & Fast Inference Engine
+
+**A. TopologyScaledBurstDetector (`adjoint_gpu.rs`)**  
+- Detects sudden “bursts” or regime shifts in the system.  
+- Scales sensitivity intelligently with fleet/source size (avoids being over-sensitive in large systems).  
+- Acts as an **attention mechanism** for the broader AI.
+
+**B. StagedReversibleBoundNarrowing (`shader_verifier.rs`)**  
+- Performs safe, incremental tightening of fairness/liveness bounds.  
+- Each stage is independently reversible.  
+- Embodies **principled, cautious constraint learning**.
+
+---
+
+#### 3. Orchestration Layer — The Executive Function
+
+**LocallyRefittingParetoFrontierModel (`cost_model.rs`)**  
+- Monitors drift in routing/encoding decisions.  
+- Performs **bounded local refits** on individual regions using recent realized outcomes.  
+- This is the AI’s **self-correction loop** for operational decisions that affect real clinical outcomes.
+
+---
+
+### Overall AI Capabilities Summary
+
+| Capability                  | Component(s)                        | Type of Intelligence                  | Clinical Relevance |
+|----------------------------|-------------------------------------|---------------------------------------|--------------------|
+| Dynamic boundary modeling  | Morphogenesis                      | Physics-informed + meta-adaptive     | Tissue/state evolution |
+| Taxonomy growth            | RL Agent + Promotion Ledger        | Semi-supervised RL + concept learning | New treatment patterns |
+| Multi-object tracking      | iVIS Two-Sided Tracker             | Probabilistic tracking + anomaly detection | Patient/cell monitoring |
+| Trust & governance         | Provenance Fuzzy Ledger            | Adversarial robustness               | Regulatory compliance |
+| Regime shift detection     | Topology-Scaled Burst Detector     | Attention & surprise detection       | Early warning |
+| Safe constraint learning   | Staged Narrowing                   | Conservative optimization            | Safety bounds |
+| Operational self-correction| Local Region Refitter              | Online learning / drift adaptation   | Treatment optimization |
+
+### Architectural Philosophy
+
+MitoNano’s AI follows several strong axioms:
+- **Compositionality**: New intelligence wraps old intelligence without breaking it.
+- **Proportional Response**: Effort scales with actual drift/risk/burstiness.
+- **Auditability & Reversibility**: Every adaptive step is logged and (where possible) reversible.
+- **Human-Augmented**: Critical taxonomy promotions require human confirmation.
+- **Defense in Depth**: Multiple overlapping safety mechanisms (two-sided checks, fuzzy quorum, staged remediation, local refits).
+
+In essence, MitoNano V14 is a **self-improving clinical simulation & control AI** that learns new biological/clinical patterns, adapts its computational strategy, maintains trust, and corrects its own decisions — all while preserving strict safety and explainability properties required for real medical deployment.
+
